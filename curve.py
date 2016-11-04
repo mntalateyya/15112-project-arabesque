@@ -28,13 +28,15 @@ class Curve:
         self.anchor2x = None
         self.anchor2y = None
         self.me = None
+        self.point1 = None
+        self.point2 = None
         self.anchor1L = None
         self.anchor2L = None
         self.anchor1H = None
         self.anchor2H = None
         self.locus = None
-        self.color = globals.fgColor  ##
-        self.width = globals.penWidth  ##
+        #self.color = globals.fgColor  ##
+        #self.width = globals.penWidth  ##
 
     def getPoint1(self):
         return self.x1, self.y1
@@ -65,10 +67,15 @@ class Curve:
         self.anchor2y = y
 
     def computeCurve(self):
-        n = int(((self.x2 - self.x1) ** 2 + (self.y2 - self.y1) ** 2) ** 0.5)/2
+        n = int(((self.x2 - self.x1) ** 2 + (self.y2 - self.y1) ** 2) ** 0.5) / 2
         if (self.anchor1x == None and self.anchor1y == None and
                     self.anchor2x == None and self.anchor2y == None):
-            self.locus = linearSegment(self.x1, self.y1, self.x2, self.y2, n)
+            points = linearSegment(self.x1, self.y1, self.x2, self.y2, n)
+            self.locus = [None] * len(points[0]) * 2
+            for i in range(len(points[0])):
+                self.locus[i * 2] = points[0][i]
+                self.locus[i * 2 + 1] = points[1][i]
+
         elif (self.anchor1x == None and self.anchor1y == None):
             sgm1 = linearSegment(self.x1, self.y1, self.anchor2x, self.anchor2y, n)
             sgm2 = linearSegment(self.anchor2x, self.anchor2y, self.x2, self.y2, n)
@@ -78,7 +85,13 @@ class Curve:
             for i in range(1, n):
                 x[i] = (i * sgm2[0][i] + (n + 1 - i) * sgm1[0][i]) / (n + 1)
                 y[i] = (i * sgm2[1][i] + (n + 1 - i) * sgm1[1][i]) / (n + 1)
-            self.locus = (x, y)
+
+            points = (x, y)
+            self.locus = [None] * len(points[0]) * 2
+            for i in range(len(points[0])):
+                self.locus[i * 2] = points[0][i]
+                self.locus[i * 2 + 1] = points[1][i]
+
         elif (self.anchor2x == None and self.anchor2y == None):
             sgm1 = linearSegment(self.x1, self.y1, self.anchor1x, self.anchor1y, n)
             sgm2 = linearSegment(self.anchor1x, self.anchor1y, self.x2, self.y2, n)
@@ -88,11 +101,16 @@ class Curve:
             for i in range(1, n):
                 x[i] = (i * sgm2[0][i] + (n + 1 - i) * sgm1[0][i]) / (n + 1)
                 y[i] = (i * sgm2[1][i] + (n + 1 - i) * sgm1[1][i]) / (n + 1)
-            self.locus = (x, y)
+
+            points = (x, y)
+            self.locus = [None] * len(points[0]) * 2
+            for i in range(len(points[0])):
+                self.locus[i * 2] = points[0][i]
+                self.locus[i * 2 + 1] = points[1][i]
         else:
             sgm1 = linearSegment(self.x1, self.y1, self.anchor1x, self.anchor1y, n)
             sgm2 = linearSegment(self.anchor1x, self.anchor1y, self.anchor2x, self.anchor2y, n)
-            sgm3 = linearSegment(self.anchor2x, self.anchor2y, self.x2, self.y2,n)
+            sgm3 = linearSegment(self.anchor2x, self.anchor2y, self.x2, self.y2, n)
             line1x1 = [None] * (n + 1)
             line1y1 = [None] * (n + 1)
             line1x2 = [None] * (n + 1)
@@ -112,95 +130,165 @@ class Curve:
                 line2y1[i] = sgm2[1][i]
                 line2x2[i] = sgm3[0][i]
                 line2y2[i] = sgm3[1][i]
-                segm4 = linearSegment(line1x1[i], line1y1[i], line2x1[i], line2y1[i],n)
-                segm5 = linearSegment(line2x1[i], line2y1[i], line2x2[i], line2y2[i],n)
-                line3 = linearSegment(segm4[0][i],segm4[1][i],segm5[0][i],segm5[1][i],n)
+                segm4 = linearSegment(line1x1[i], line1y1[i], line2x1[i], line2y1[i], n)
+                segm5 = linearSegment(line2x1[i], line2y1[i], line2x2[i], line2y2[i], n)
+                line3 = linearSegment(segm4[0][i], segm4[1][i], segm5[0][i], segm5[1][i], n)
                 x[i], y[i] = line3[0][i], line3[1][i]
             x[0], y[0], x[n], y[n] = self.x1, self.y1, self.x2, self.y2
-            self.locus = (x, y)
-            '''line1x[i] = (i * sgm2[0][i] + (n + 1 - i) * sgm1[0][i]) / (n + 1)
-            line1y[i] = (i * sgm2[1][i] + (n + 1 - i) * sgm1[1][i]) / (n + 1)
-            xq[0], yq[0], xq[n], yq[n] = self.x1, self.y1, self.x2, self.y2
-            self.locus = (xq, yq)'''
+
+            points = (x, y)
+            self.locus = [None] * len(points[0]) * 2
+            for i in range(len(points[0])):
+                self.locus[i * 2] = points[0][i]
+                self.locus[i * 2 + 1] = points[1][i]
 
     def drawCurve(self, c):
+        self.computeCurve()
         # Potential bug
+        if self.me != None:
+            c.delete(self.me)
+
+        self.me = c.create_line(self.locus, tags='curve')
+        self.drawAnchor1(c)
+        self.drawAnchor2(c)
+        self.drawPoint1(c)
+        self.drawAnchor2(c)
+
+    def drawAnchor1(self, c):
+        if self.anchor1x != None:
+            c.delete(self.anchor1L)
+            c.delete(self.anchor1H)
+            self.anchor1L = c.create_line(self.x1, self.y1, self.anchor1x, self.anchor1y, tags='anchor_line')
+            self.anchor1H = c.create_oval(self.anchor1x - 3, self.anchor1y - 3, self.anchor1x + 3, self.anchor1y + 3,
+                                      fill='blue',
+                                      activefill='red', tags='anchor')
+
+    def drawAnchor2(self, c):
+        if self.anchor2x != None:
+            c.delete(self.anchor2H)
+            c.delete(self.anchor2L)
+            self.anchor2L = c.create_line(self.x2, self.y2, self.anchor2x, self.anchor2y, tags='anchor_line')
+            self.anchor2H = c.create_oval(self.anchor2x - 3, self.anchor2y - 3, self.anchor2x + 3, self.anchor2y + 3,
+                                          fill='blue',
+                                          activefill='red', tags='anchor')
+
+    def drawPoint1(self, c):
+        if self.point1 != None:
+            c.delete(self.point1)
+        self.point1 = c.create_oval(self.x1 - 2, self.y1 - 2, self.x1 + 2, self.y1 + 2,
+                                    fill='black',
+                                    activefill='red', tags='point')
+
+    def drawPoint2(self, c):
+        if self.point2 != None:
+            c.delete(self.point2)
+        self.point2 = c.create_oval(self.x2 - 2, self.y2 - 2, self.x2 + 2, self.y2 + 2,
+                                    fill='black',
+                                    activefill='red', tags='point')
+
+    def deleteCurve(self, c):
         c.delete(self.me)
-        c.delete(self.anchor1H)
+        c.delete(self.point1)
+        c.delete(self.point2)
         c.delete(self.anchor1L)
-        c.delete(self.anchor2H)
+        c.delete(self.anchor1H)
         c.delete(self.anchor2L)
-
-        if (self.anchor1x == None and self.anchor1y == None and
-                    self.anchor2x == None and self.anchor2y == None):
-            self.drawLine(c)
-        elif (self.anchor1x == None and self.anchor1y == None):
-            self.drawBezierQ(c, 0)
-        elif (self.anchor2x == None and self.anchor2y == None):
-            self.drawBezierQ(c, 1)
-        else:
-            self.drawBezierC(c)
-
-    def drawAnchor(self, c):
-        self.anchor1L = self.create_line(self.x1, self.y1, self.anchor1x, self.anchor1y)
-        self.anchor1H = self.create_oval(self.anchor1x - 3, self.anchor1y - 3, self.anchor1x + 3, self.anchor2y + 3,
-                                         fill='blue',
-                                         activefill='red')
-
-    def drawLine(self, c):
-        self.me = c.create_line(self.x1, self.y1, self.x2, self.y2)
-
-    def drawBezierQ(self, c):
-        pass
-
-    def drawBezierC(self, c):
-        pass
+        c.delete(self.anchor2H)
 
 
 class HelperObject:
     def __init__(self):
-        self.x1 = None
-        self.x2 = None
-        self.x3 = None
-        self.x4 = None
-        self.y1 = None
-        self.y2 = None
-        self.y3 = None
-        self.y4 = None
+        self.x_point = None
+        self.x_anchor = None
+        self.y_point = None
+        self.y_anchor = None
         self.state = 0
+        self.curves = []
+        self.object = None
 
 
-def masterClick(e, x, y, helper):
-    if helper.state == 0:
-        pass
-    elif helper.state == 2:
-        pass
+def masterClick(x, y, helperObject, c):
+    if helperObject.state == 0:
+        helperObject.object = Curve()
+        helperObject.curves.append(helperObject.object)
+        helperObject.object.setPoint1(x, y)
+        helperObject.object.drawPoint1(c)
+        helperObject.state = 1
+
+    elif helperObject.state == 2:
+        if helperObject.object.x1 == x:
+            helperObject.object.deleteCurve(c)
+            helperObject.curves.pop()
+            if helperObject.curves == []:
+                helperObject.state = 0
+            else:
+                helperObject.state = 4
+        else:
+            helperObject.object.setPoint2(x, y)
+            helperObject.object.drawPoint2(c)
+            helperObject.curves.append(Curve())
+            helperObject.x_point = x
+            helperObject.y_point = y
+            helperObject.state = 3
 
 
-def masterRelease(e, x, y, helper):
-    if helper.state == 1:
-        pass
-    elif helper.state == 3:
-        pass
+
+def masterRelease(x, y, helperObject, c):
+    print 'released',helperObject.state
+    if helperObject.state == 1:
+        if helperObject.object.x1 == x and helperObject.object.y1 == y:
+            helperObject.object.setAnchor1(None, None)
+        else:
+            helperObject.object.setAnchor1(x, y)
+        helperObject.state = 2
+
+    elif helperObject.state == 3:
+        print 'finished'
+        if helperObject.object.x2 == x and helperObject.object.y2 == y:
+            helperObject.object.setAnchor2(None,None)
+            helperObject.object.drawCurve(c)
+            helperObject.x_anchor,helperObject.y_anchor = None,None
+        else:
+            helperObject.object.setAnchor2(helperObject.object.x2*2-x,helperObject.object.y2*2-y)
+            helperObject.object.drawCurve(c)
+            helperObject.x_anchor = x
+            helperObject.y_anchor = y
+
+        helperObject.object = helperObject.curves.pop()
+        helperObject.curves.append(helperObject.object)
+        helperObject.object.setPoint1(helperObject.x_point,helperObject.y_point)
+        helperObject.object.setAnchor1(helperObject.x_anchor,helperObject.y_anchor)
+        helperObject.state = 2
 
 
-def masterMotion(e, x, y, helper):
-    if helper.state == 1:
-        pass
-    elif helper.state == 3:
-        pass
+
+def masterPressedMotion(x, y, helperObject, c):
+    if helperObject.state == 1:
+        helperObject.object.setAnchor1(x,y)
+        helperObject.object.drawAnchor1(c)
+
+    elif helperObject.state == 3:
+        helperObject.object.setAnchor2(helperObject.object.x2*2-x,helperObject.object.y2*2-y)
+        helperObject.object.drawCurve(c)
+
+def masterMotion(x, y, helperObject, c):
+    if helperObject.state == 2:
+        print 'moving'
+        helperObject.object.setPoint2(x,y)
+        helperObject.object.drawCurve(c)
 
 
-def avtivate(c):
-    helper = HelperObject()
-    c.bind('<Button-1', lambda e: masterClick(e.x, e.y, helper))
-    c.bind('<B1-Motion>', lambda e: masterMotion(e.x, e.y, helper))
-    c.bind('<Button-1-Release>', lambda e: masterRelease(e.x, e.y, helper))
-    return helper
+def activate(c):
+    helperObject = HelperObject()
+    c.bind('<Button-1>', lambda e: masterClick(e.x, e.y, helperObject, c))
+    c.bind('<B1-Motion>', lambda e: masterPressedMotion(e.x, e.y, helperObject, c))
+    c.bind('<ButtonRelease-1>', lambda e: masterRelease(e.x, e.y, helperObject, c))
+    c.bind('<Motion>',lambda e:masterMotion(e.x,e.y,helperObject,c))
+    return helperObject
 
 
-def deactivate(c, obj):
-    c.unbind('<Button-1')
+def deactivate(c, helperObject):
+    c.unbind('<Button-1>')
     c.unbind('<B1-Motion>')
-    c.unbind('<Button-1-Release>')
-    del obj
+    c.unbind('<ButtonRelease-1>')
+    del helperObject
