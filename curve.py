@@ -25,7 +25,7 @@
 
 from Tkinter import *
 from PIL import Image, ImageDraw, ImageTk# import globals #####
-import DrawMeta
+import DrawMeta #
 
 
 # given a line and number of segments, returns coordinates of points of segmenting the line n segments
@@ -258,7 +258,7 @@ def masterClick(x, y, helperObject, c, im):
     elif helperObject.state == 4 or helperObject.state == 5:
         if not c.find_enclosed(x-5,y-5,x+5,y+5):
             for i in helperObject.curves:
-                print i,'==',i.locus
+                print '*******'
             restart(c,helperObject,im)
             helperObject.state=0
 
@@ -347,11 +347,10 @@ def movePoint(c,id,e,helperObject,meta):
             deltax = e.x - i.x2
             deltay = e.y - i.y2
             i.setPoint2(e.x,e.y)
-            print 'deltas ===',i.anchor2x,deltax,i.anchor2y,deltay
             i.setAnchor2(i.anchor2x+deltax,i.anchor2y+deltay)
             i.drawCurve(c,meta)
             ref = i.drawPoint2(c)
-            c.bind('<B1-Motion>', lambda e, id=i: movePoint(c, id.point2, e, helperObject))
+            c.bind('<B1-Motion>', lambda e, id=i: movePoint(c, id.point2, e, helperObject,meta))
             c.lift(i.point2)
         elif i.point1 == id:
             deltax = e.x - i.x1
@@ -363,7 +362,7 @@ def movePoint(c,id,e,helperObject,meta):
                 i.point1 = ref
             else:
                 i.drawPoint1(c)
-            c.bind('<B1-Motion>', lambda e, id=i: movePoint(c, id.point1, e, helperObject))
+            c.bind('<B1-Motion>', lambda e, id=i: movePoint(c, id.point1, e, helperObject,meta))
             c.lift(i.point1)
 
 # unbinds canvas from items when mouse released
@@ -378,7 +377,6 @@ def unbind(c,helperObject):
 def restart(c,helperObject,meta):
     draw = ImageDraw.Draw(meta.get_image())
     for i in helperObject.curves:
-        print i.locus,'*****'
         draw.line(i.locus,fill=meta.get_fg(),width=meta.get_width())
         i.deleteCurve(c)
     meta.draw(c)
