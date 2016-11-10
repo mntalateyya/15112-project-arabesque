@@ -169,7 +169,7 @@ class Curve:
         # compute locus of points
         self.computeCurve()
         c.delete(self.me) # delete previous drawing
-        self.me = c.create_line(self.locus, tags='curve', fill='#ff00ff', width= meta.get_width()) # curve path
+        self.me = c.create_line(self.locus, tags='curve', fill='#ff00ff', width= 1) # curve path
         self.drawAnchor1(c) # anchors
         self.drawAnchor2(c)
         # self.drawPoint1(c) # point markers
@@ -180,7 +180,8 @@ class Curve:
         if self.anchor1x != None:
             c.delete(self.anchor1L)
             c.delete(self.anchor1H)
-            self.anchor1L = c.create_line(self.x1, self.y1, self.anchor1x, self.anchor1y, tags='anchor_line')
+            self.anchor1L = c.create_line(self.x1, self.y1, self.anchor1x, self.anchor1y, tags='anchor_line',
+                                          fill='#888888')
             self.anchor1H = c.create_oval(self.anchor1x - 3, self.anchor1y - 3, self.anchor1x + 3, self.anchor1y + 3,
                                   fill='blue', activefill='red', tags='anchor')
     # draws the second anchor line of the curve
@@ -188,7 +189,8 @@ class Curve:
         if self.anchor2x is not None:
             c.delete(self.anchor2H)
             c.delete(self.anchor2L)
-            self.anchor2L = c.create_line(self.x2, self.y2, self.anchor2x, self.anchor2y, tags='anchor_line')
+            self.anchor2L = c.create_line(self.x2, self.y2, self.anchor2x, self.anchor2y, tags='anchor_line',
+                                          fill='#888888')
             self.anchor2H = c.create_oval(self.anchor2x - 3, self.anchor2y - 3, self.anchor2x + 3, self.anchor2y + 3,
                                       fill='blue',activefill='red', tags='anchor')
 
@@ -196,7 +198,7 @@ class Curve:
     def drawPoint1(self, c):
         if self.point1 is not None:
             c.delete(self.point1)
-        self.point1 = c.create_oval(self.x1 - 2, self.y1 - 2, self.x1 + 2, self.y1 + 2,
+        self.point1 = c.create_oval(self.x1 - 3, self.y1 - 3, self.x1 + 3, self.y1 + 3,
                                     fill='black', activefill='green', tags='point')
         return self.point1
 
@@ -204,7 +206,7 @@ class Curve:
     def drawPoint2(self, c):
         if self.point2 is not None:
             c.delete(self.point2)
-        self.point2 = c.create_oval(self.x2 - 2, self.y2 - 2, self.x2 + 2, self.y2 + 2,
+        self.point2 = c.create_oval(self.x2 - 3, self.y2 - 3, self.x2 + 3, self.y2 + 3,
                                     fill='black', activefill='green', tags='point')
         return self.point2
 
@@ -256,9 +258,8 @@ def masterClick(x, y, helperObject, c, im):
             helperObject.point_mark = helperObject.object.point2
             helperObject.state = 3
     elif helperObject.state == 4 or helperObject.state == 5:
-        if not c.find_enclosed(x-5,y-5,x+5,y+5):
-            for i in helperObject.curves:
-                print '*******'
+        if not(c.find_enclosed(x-8,y-8,x+8,y+8)):
+            print c.find_enclosed(x-6,y-6,x+6,y+6),'*******'
             restart(c,helperObject,im)
             helperObject.state=0
 
@@ -311,7 +312,7 @@ def masterMotion(x, y, helperObject, c,meta):
             c.tag_bind(i,'<Button-1>',lambda e, id=i: bindAnchor(c,id,helperObject))
         for i in c.find_withtag('point'):
             c.tag_bind(i,'<Button-1>',lambda e, id=i: bindPoint(c,id,helperObject))
-            c.lift(i)
+            c.tag_raise(i)
         helperObject.state = 5
 
 # binds canvas to an anchor during drawing
@@ -347,7 +348,8 @@ def movePoint(c,id,e,helperObject,meta):
             deltax = e.x - i.x2
             deltay = e.y - i.y2
             i.setPoint2(e.x,e.y)
-            i.setAnchor2(i.anchor2x+deltax,i.anchor2y+deltay)
+            if i.anchor2x is not None:
+                i.setAnchor2(i.anchor2x+deltax,i.anchor2y+deltay)
             i.drawCurve(c,meta)
             ref = i.drawPoint2(c)
             c.bind('<B1-Motion>', lambda e, id=i: movePoint(c, id.point2, e, helperObject,meta))
@@ -356,7 +358,8 @@ def movePoint(c,id,e,helperObject,meta):
             deltax = e.x - i.x1
             deltay = e.y - i.y1
             i.setPoint1(e.x, e.y)
-            i.setAnchor1(i.anchor1x+deltax,i.anchor1y+deltay)
+            if i.anchor1x is not None:
+                i.setAnchor1(i.anchor1x+deltax,i.anchor1y+deltay)
             i.drawCurve(c,meta)
             if ref is not None:
                 i.point1 = ref
@@ -375,11 +378,12 @@ def unbind(c,helperObject):
 
 # finalizes a curve and starts drawing a new curve
 def restart(c,helperObject,meta):
-    draw = ImageDraw.Draw(meta.get_image())
+    image = meta.get_image()
+    draw = ImageDraw.Draw(image)
     for i in helperObject.curves:
         draw.line(i.locus,fill=meta.get_fg(),width=meta.get_width())
         i.deleteCurve(c)
-    meta.draw(c)
+    meta.draw(c,image)
     c.delete(helperObject.curves[0].point1)
     helperObject.curves = []
     helperObject.x_point = None
