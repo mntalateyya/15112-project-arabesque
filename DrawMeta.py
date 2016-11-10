@@ -10,7 +10,7 @@
 #   08/11/16 15:55  08/11/16 16:03
 #   08/11/16 17:40  08/11/16 18:15
 
-import Tkinter
+from Tkinter import *
 from PIL import Image, ImageTk
 
 
@@ -21,12 +21,13 @@ class MetaResources:
             pic = Image.open(im)
             print pic.mode
             self.image.paste(pic,box=(0,0))
+        self.imagesStack = []
         self.fg = '#000000'  # foreground color
         self.bg = '#990000'  # background color
         self.width = 1  # stroke width
 
     def get_image(self):
-        return self.image
+        return self.image.copy()
 
     def get_fg(self):
         return self.fg
@@ -46,10 +47,11 @@ class MetaResources:
     def set_width(self, w):
         self.width = w
 
-    def draw(self, c):
+    def draw(self, c, im):
+        self.image = im
         photo = ImageTk.PhotoImage(image=self.image)
         c.one = photo
-        c.create_image(0,0,image= photo,anchor=Tkinter.NW)
+        c.create_image(0,0,image= photo,anchor=NW)
 
     #img_ice = ImageTk.PhotoImage(image=Image.open("ice.png"))
     #ice_img = c.create_image(500,345,image=img_ice)
