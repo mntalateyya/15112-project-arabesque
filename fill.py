@@ -12,7 +12,8 @@
 #   08/11/16 21:18  08/11/16 23:13
 
 from Tkinter import *
-import DrawMeta
+from PIL import Image
+import DrawMeta #
 
 class helperObject:
     def __init__(self,meta):
@@ -63,7 +64,7 @@ def fill(helper, c, e, meta):
         fill_color = (int(helper.bg[1:3],16),int(helper.bg[3:5],16),int(helper.bg[5:7],16))
         fill_loop(pic, fill_color, helper.initial_col, w, h, q)
         helper.image.save('test2.png')
-        meta.draw(c)
+        meta.draw(c,helper.image)
 
 def activate(c,meta):
     helper = helperObject(meta)
@@ -73,7 +74,7 @@ def activate(c,meta):
 wnd = Tk()
 c = Canvas(wnd,bg='white',width=400,height=400)
 c.pack()
-meta = DrawMeta.MetaResources(400,400,'C:/Python27/test1.png')
-meta.draw(c)
+meta = DrawMeta.MetaResources(400,400)
+meta.draw(c,Image.open('C:/Python27/test1.png'))
 activate(c,meta)
 wnd.mainloop()
