@@ -19,7 +19,7 @@ class helperObject:
     def __init__(self,meta):
         self.x = None
         self.y = None
-        self.bg = meta.get_bg()
+        self.color = ''
         self.initial_col = (0,0,0)
         self.image = meta.get_image()
 
@@ -27,9 +27,12 @@ class helperObject:
         self.x = e.x
         self.y = e.y
         self.initial_col = self.image.getpixel((self.x,self.y))
+        self.color = meta.get_color()
 
-    def reset_bg(self,col):
-        self.bg = meta.get_bg()
+
+    def clear(self,c):
+        pass
+
 
 # This algoriths is cited from https://en.wikipedia.org/wiki/Flood_fill
 def fill_loop(im, fillColor, origin, w, h, q):
@@ -52,29 +55,21 @@ def fill_loop(im, fillColor, origin, w, h, q):
 
 
 def fill(helper, c, e, meta):
-    print'abc'
-    if '#' + ''.join(str(x) for x in helper.initial_col) == helper.bg:
+    if '#' + ''.join(str(x) for x in helper.initial_col) == helper.color:
         return
     if e.x == helper.x and e.y == helper.y:
         pic = helper.image.load()
-        # helper.draw.point((helper.x,helper.y),fill=helper.bg)
+        # helper.draw.point((helper.x,helper.y),fill=helper.color)
         w, h = helper.image.size
         q = []
         q.append((e.x, e.y))
-        fill_color = (int(helper.bg[1:3],16),int(helper.bg[3:5],16),int(helper.bg[5:7],16))
+        fill_color = (int(helper.color[1:3],16),int(helper.color[3:5],16),int(helper.color[5:7],16))
         fill_loop(pic, fill_color, helper.initial_col, w, h, q)
         helper.image.save('test2.png')
-        meta.draw(c,helper.image)
+        meta.draw(helper.image)
 
 def activate(c,meta):
     helper = helperObject(meta)
     c.bind('<Button-1>',lambda e: helper.set_coords(e,meta))
     c.bind('<ButtonRelease-1>',lambda e: fill(helper,c,e,meta))
-
-wnd = Tk()
-c = Canvas(wnd,bg='white',width=400,height=400)
-c.pack()
-meta = DrawMeta.MetaResources(400,400)
-meta.draw(c,Image.open('C:/Python27/test1.png'))
-activate(c,meta)
-wnd.mainloop()
+    return helper
