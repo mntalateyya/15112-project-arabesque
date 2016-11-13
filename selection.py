@@ -26,14 +26,9 @@ class helperObject:
         self.TkImage = None
         self.image_label = 0
 
-
-def blink(c,helper,count=0):
-    if helper.state in [1,2]:
-        if count ==0:
-            c.itemconfig(helper.square,outline='#ff8888')
-        else:
-            c.itemconfig(helper.square, outline='#888888')
-    c.after(250,lambda : blink(c,helper,1-count))
+    def clear(self,c):
+        c.delete(self.square)
+        c.delete(self.image_label)
 
 def masterClick(c, e,helper):
     if helper.state==1 and not(helper.x1<e.x<helper.x2 and helper.y1<e.y<helper.y2):
@@ -63,10 +58,9 @@ def masterPressedMotion(c,e,helper):
         helper.image_label = c.create_image(helper.x1+deltax,helper.y1+deltay, image=helper.TkImage, anchor=NW)
         helper.square = c.create_rectangle(helper.x1+deltax,helper.y1+deltay,helper.x2+deltax,helper.y2+deltay)
 
-def masterRelease(e,helper):
+def masterRelease(e,helper,meta):
     if helper.state == 0:
         helper.image = meta.get_image().crop((helper.x1,helper.y1,helper.x2,helper.y2))
-        blink(c,helper)
         helper.state=1
     if helper.state ==2:
         deltax = e.x - helper.mousex
@@ -79,8 +73,12 @@ def masterRelease(e,helper):
 
 def cut(helper,meta):
     if helper.state ==1:
-        helper.image = meta.get_image().crop((helper.x1,helper.y1,helper.x2,helper.y2))
-
+        print 'coords',helper.x1, helper.y1, helper.x2, helper.y2
+        to_paste = Image.new('RGB', (abs(helper.x2 - helper.x1), abs(helper.y2 - helper.y1)), '#ffffff')
+        new_im = meta.get_image()
+        new_im.paste(to_paste,(helper.x1, helper.y1, helper.x2, helper.y2))
+        print 'topaste', to_paste,'== new im',new_im
+        meta.draw(new_im)
 
 def copy(helper,meta):
     helper.image = meta.get_image().crop((helper.x1,helper.y1,helper.x2,helper.y2))
@@ -96,15 +94,8 @@ def activate(c,meta):
     c.focus_set()
     c.bind('<Button-1>',lambda e: masterClick(c,e,helper))
     c.bind('<B1-Motion>',lambda e: masterPressedMotion(c,e,helper))
-    c.bind('<ButtonRelease-1>',lambda e: masterRelease(e,helper))
+    c.bind('<ButtonRelease-1>',lambda e: masterRelease(e,helper,meta))
     c.bind('x',lambda e: cut(helper,meta))
     c.bind('c',lambda e: copy(helper,meta))
     c.bind('v',lambda e: paste(helper,meta))
-
-wnd = Tk()
-c = Canvas(wnd,bg='white',width=400,height=400)
-c.pack()
-meta = DrawMeta.MetaResources(400,400,'C:/Python27/test1.png')
-meta.draw(c)
-activate(c,meta)
-wnd.mainloop()
+    return helper
