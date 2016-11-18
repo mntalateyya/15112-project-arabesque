@@ -1,6 +1,4 @@
-from  Tkinter import *
-from PIL import Image, ImageDraw
-import DrawMeta
+from PIL import ImageDraw
 
 class helperObject:
     def __init__(self):
@@ -25,12 +23,11 @@ def move(e,helper,meta):
         helper.linesLoci[-1].append(e.y)
     helper.x, helper.y = e.x,e.y
 
-def release(e,helper,meta):
+def release(helper,meta):
     image = meta.get_image()
     draw = ImageDraw.Draw(image)
     for i in helper.linesLoci:
         draw.line(i,fill=meta.get_color(),width = int(meta.get_width()))
-    image.save('test.png')
     meta.draw(image)
     for i in helper.linesIDs:
         meta.canvas.delete(i)
@@ -38,8 +35,8 @@ def release(e,helper,meta):
     helper.linesLoci = []
 
 
-def activate(c,meta):
+def activate(meta):
     helper = helperObject()
-    c.bind('<Button-1>',lambda e: press(e,helper))
-    c.bind('<B1-Motion>', lambda e: move(e, helper,meta))
-    c.bind('<ButtonRelease-1>', lambda e: release(e, helper,meta))
+    meta.canvas.bind('<Button-1>',lambda e: press(e,helper))
+    meta.canvas.bind('<B1-Motion>', lambda e: move(e, helper,meta))
+    meta.canvas.bind('<ButtonRelease-1>', lambda e: release(helper,meta))

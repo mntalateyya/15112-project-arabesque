@@ -23,9 +23,9 @@
 ''' This module draws bezier curves on a Tkinter canvas. It is activated by calling activate function and deactivated
  calling deactivate function. When active, it binds mouse motion and left mouse button to its functions.'''
 
-from Tkinter import *
-from PIL import Image, ImageDraw, ImageTk# import globals #####
-import DrawMeta #
+
+from PIL import ImageDraw
+
 
 
 # given a line and number of segments, returns coordinates of points of segmenting the line n segments
@@ -165,59 +165,58 @@ class Curve:
                 self.locus[i * 2 + 1] = int(points[1][i])
 
     # takes a Tkinter canvas instance and draws the curve on it
-    def drawCurve(self, c,meta):
+    def drawCurve(self,meta):
         # compute locus of points
         self.computeCurve()
-        c.delete(self.me) # delete previous drawing
-        self.me = c.create_line(self.locus, tags='curve', fill=meta.get_color(), width= meta.get_width()) # curve path
-        self.drawAnchor1(c) # anchors
-        self.drawAnchor2(c)
-        # self.drawPoint1(c) # point markers
-        # self.drawAnchor2(c)
+        meta.canvas.delete(self.me) # delete previous drawing
+        self.me = meta.canvas.create_line(self.locus, tags='curve', fill=meta.get_color(), width= meta.get_width()) # curve path
+        self.drawAnchor1(meta) # anchors
+        self.drawAnchor2(meta)
+
 
     # draws the first anchor line of the curve
-    def drawAnchor1(self, c):
+    def drawAnchor1(self, meta):
         if self.anchor1x != None:
-            c.delete(self.anchor1L)
-            c.delete(self.anchor1H)
-            self.anchor1L = c.create_line(self.x1, self.y1, self.anchor1x, self.anchor1y, tags='anchor_line',
+            meta.canvas.delete(self.anchor1L)
+            meta.canvas.delete(self.anchor1H)
+            self.anchor1L = meta.canvas.create_line(self.x1, self.y1, self.anchor1x, self.anchor1y, tags='anchor_line',
                                           fill='#ff00ff')
-            self.anchor1H = c.create_oval(self.anchor1x - 3, self.anchor1y - 3, self.anchor1x + 3, self.anchor1y + 3,
+            self.anchor1H = meta.canvas.create_oval(self.anchor1x - 3, self.anchor1y - 3, self.anchor1x + 3, self.anchor1y + 3,
                                   fill='blue', activefill='red', tags='anchor')
     # draws the second anchor line of the curve
-    def drawAnchor2(self, c):
+    def drawAnchor2(self, meta):
         if self.anchor2x is not None:
-            c.delete(self.anchor2H)
-            c.delete(self.anchor2L)
-            self.anchor2L = c.create_line(self.x2, self.y2, self.anchor2x, self.anchor2y, tags='anchor_line',
+            meta.canvas.delete(self.anchor2H)
+            meta.canvas.delete(self.anchor2L)
+            self.anchor2L = meta.canvas.create_line(self.x2, self.y2, self.anchor2x, self.anchor2y, tags='anchor_line',
                                           fill='#ff00ff')
-            self.anchor2H = c.create_oval(self.anchor2x - 3, self.anchor2y - 3, self.anchor2x + 3, self.anchor2y + 3,
+            self.anchor2H = meta.canvas.create_oval(self.anchor2x - 3, self.anchor2y - 3, self.anchor2x + 3, self.anchor2y + 3,
                                       fill='blue',activefill='red', tags='anchor')
 
     # draws the first point marker
-    def drawPoint1(self, c):
+    def drawPoint1(self, meta):
         if self.point1 is not None:
-            c.delete(self.point1)
-        self.point1 = c.create_oval(self.x1 - 3, self.y1 - 3, self.x1 + 3, self.y1 + 3,
+            meta.canvas.delete(self.point1)
+        self.point1 = meta.canvas.create_oval(self.x1 - 3, self.y1 - 3, self.x1 + 3, self.y1 + 3,
                                     fill='black', activefill='green', tags='point')
         return self.point1
 
     # draws the second point marker
-    def drawPoint2(self, c):
+    def drawPoint2(self, meta):
         if self.point2 is not None:
-            c.delete(self.point2)
-        self.point2 = c.create_oval(self.x2 - 3, self.y2 - 3, self.x2 + 3, self.y2 + 3,
+            meta.canvas.delete(self.point2)
+        self.point2 = meta.canvas.create_oval(self.x2 - 3, self.y2 - 3, self.x2 + 3, self.y2 + 3,
                                     fill='black', activefill='green', tags='point')
         return self.point2
 
     # deletes the curve's drawing on canvas
-    def deleteCurve(self, c):
-        c.delete(self.me)
-        c.delete(self.point2)
-        c.delete(self.anchor1L)
-        c.delete(self.anchor1H)
-        c.delete(self.anchor2L)
-        c.delete(self.anchor2H)
+    def deleteCurve(self, canvas):
+        canvas.delete(self.me)
+        canvas.delete(self.point2)
+        canvas.delete(self.anchor1L)
+        canvas.delete(self.anchor1H)
+        canvas.delete(self.anchor2L)
+        canvas.delete(self.anchor2H)
 
 # a helper class that facilitates the interaction between objects and and the events
 class HelperObject:
@@ -237,17 +236,17 @@ class HelperObject:
             curve.deleteCurve(c)
 
 # controls click events during drawing
-def masterClick(x, y, helperObject, c, im):
+def masterClick(x, y, helperObject, meta):
     if helperObject.state == 0:
         helperObject.object = Curve()
         helperObject.curves.append(helperObject.object)
         helperObject.object.setPoint1(x, y)
-        helperObject.object.drawPoint1(c)
+        helperObject.object.drawPoint1(meta)
         helperObject.state = 1
 
     elif helperObject.state == 2:
         if helperObject.object.x1 == x:
-            helperObject.object.deleteCurve(c)
+            helperObject.object.deleteCurve(meta.canvas)
             helperObject.curves.pop()
             if not helperObject.curves:
                 helperObject.state = 0
@@ -256,20 +255,19 @@ def masterClick(x, y, helperObject, c, im):
         else:
 
             helperObject.object.setPoint2(x, y)
-            helperObject.object.drawPoint2(c)
+            helperObject.object.drawPoint2(meta)
             helperObject.curves.append(Curve())
             helperObject.x_point = x
             helperObject.y_point = y
             helperObject.point_mark = helperObject.object.point2
             helperObject.state = 3
     elif helperObject.state == 4 or helperObject.state == 5:
-        if not(c.find_enclosed(x-8,y-8,x+8,y+8)):
-            print c.find_enclosed(x-6,y-6,x+6,y+6),'*******'
-            restart(c,helperObject,im)
+        if not(meta.canvas.find_enclosed(x-8,y-8,x+8,y+8)):
+            restart(helperObject,meta)
             helperObject.state=0
 
 # controls button release event during drawing
-def masterRelease(x, y, helperObject, c, meta):
+def masterRelease(x, y, helperObject, meta):
     if helperObject.state == 1:
         if helperObject.object.x1 == x and helperObject.object.y1 == y:
             helperObject.object.setAnchor1(None, None)
@@ -281,11 +279,11 @@ def masterRelease(x, y, helperObject, c, meta):
         if helperObject.object.x2 == x and helperObject.object.y2 == y:
             helperObject.object.x1,helperObject.object.x2
             helperObject.object.setAnchor2(None,None)
-            helperObject.object.drawCurve(c,meta)
+            helperObject.object.drawCurve(meta)
             helperObject.x_anchor,helperObject.y_anchor = None,None
         else:
             helperObject.object.setAnchor2(helperObject.object.x2*2-x,helperObject.object.y2*2-y)
-            helperObject.object.drawCurve(c,meta)
+            helperObject.object.drawCurve(meta)
             helperObject.x_anchor = x
             helperObject.y_anchor = y
 
@@ -298,55 +296,55 @@ def masterRelease(x, y, helperObject, c, meta):
 
 
 # controls mouse presses-motion event during drawing
-def masterPressedMotion(x, y, helperObject, c,meta):
+def masterPressedMotion(x, y, helperObject, meta):
     if helperObject.state == 1 and abs(helperObject.object.x1-x)>1 and abs(helperObject.object.y1-y)>1:
         helperObject.object.setAnchor1(x,y)
-        helperObject.object.drawAnchor1(c)
+        helperObject.object.drawAnchor1(meta)
 
     elif helperObject.state == 3 and abs(helperObject.object.x2-x)>1 and abs(helperObject.object.y2-y)>1:
         helperObject.object.setAnchor2(helperObject.object.x2*2-x,helperObject.object.y2*2-y)
-        helperObject.object.drawCurve(c,meta)
+        helperObject.object.drawCurve(meta)
 
 # controls mouse motion event during drawing
-def masterMotion(x, y, helperObject, c,meta):
+def masterMotion(x, y, helperObject, meta):
     if helperObject.state == 2 and abs(helperObject.object.x1-x)>1 and abs(helperObject.object.y1-y)>1:
         helperObject.object.setPoint2(x,y)
-        helperObject.object.drawCurve(c,meta)
+        helperObject.object.drawCurve(meta)
     elif helperObject.state == 4:
-        for i in c.find_withtag('anchor'):
-            c.tag_bind(i,'<Button-1>',lambda e, id=i: bindAnchor(c,id,helperObject,meta))
-        for i in c.find_withtag('point'):
-            c.tag_bind(i,'<Button-1>',lambda e, id=i: bindPoint(c,id,helperObject,meta))
-            c.tag_raise(i)
+        for i in meta.canvas.find_withtag('anchor'):
+            meta.canvas.tag_bind(i,'<Button-1>',lambda e, id=i: bindAnchor(id,helperObject,meta))
+        for i in meta.canvas.find_withtag('point'):
+            meta.canvas.tag_bind(i,'<Button-1>',lambda e, id=i: bindPoint(id,helperObject,meta))
+            meta.canvas.tag_raise(i)
         helperObject.state = 5
 
 # binds canvas to an anchor during drawing
-def bindAnchor(c,id,helperObject,meta):
-    c.bind('<B1-Motion>',lambda e, i = id: moveAnchor(c,i,e,helperObject,meta))
-    c.bind('<ButtonRelease-1>',lambda e : unbind(c,helperObject,meta))
+def bindAnchor(id,helperObject,meta):
+    meta.canvas.bind('<B1-Motion>',lambda e, i = id: moveAnchor(i,e,helperObject,meta))
+    meta.canvas.bind('<ButtonRelease-1>',lambda e : unbind(helperObject,meta))
 
 # binds canvas to a point during drawing
-def bindPoint(c,id,helperObject,meta):
-    c.bind('<B1-Motion>', lambda e, i=id: movePoint(c,i,e,helperObject,meta))
-    c.bind('<ButtonRelease-1>', lambda e: unbind(c,helperObject,meta))
+def bindPoint(id,helperObject,meta):
+    meta.canvas.bind('<B1-Motion>', lambda e, i=id: movePoint( i,e,helperObject,meta))
+    meta.canvas.bind('<ButtonRelease-1>', lambda e: unbind( helperObject,meta))
 
 # moves anchor to mouse coordinates and redraws curve
-def moveAnchor(c,id,e,helperObject,meta):
+def moveAnchor( id,e,helperObject,meta):
     for i in helperObject.curves:
         if i.anchor1H == id:
             i.setAnchor1(e.x,e.y)
             i.computeCurve()
-            i.drawCurve(c,meta)
-            c.bind('<B1-Motion>', lambda e, id=i: moveAnchor(c, id.anchor1H, e, helperObject,meta))
+            i.drawCurve( meta)
+            meta.canvas.bind('<B1-Motion>', lambda e, id=i: moveAnchor(  id.anchor1H, e, helperObject,meta))
             return
         elif i.anchor2H == id:
             i.setAnchor2(e.x, e.y)
             i.computeCurve()
-            i.drawCurve(c,meta)
-            c.bind('<B1-Motion>', lambda e, id=i: moveAnchor(c, id.anchor2H, e, helperObject,meta))
+            i.drawCurve( meta)
+            meta.canvas.bind('<B1-Motion>', lambda e, id=i: moveAnchor(  id.anchor2H, e, helperObject,meta))
             return
 # moves point to mouse coordinates and redraws curves
-def movePoint(c,id,e,helperObject,meta):
+def movePoint( id,e,helperObject,meta):
     ref = None
     for i in helperObject.curves:
         if i.point2 == id:
@@ -355,42 +353,41 @@ def movePoint(c,id,e,helperObject,meta):
             i.setPoint2(e.x,e.y)
             if i.anchor2x is not None:
                 i.setAnchor2(i.anchor2x+deltax,i.anchor2y+deltay)
-            i.drawCurve(c,meta)
-            ref = i.drawPoint2(c)
-            c.bind('<B1-Motion>', lambda e, id=i: movePoint(c, id.point2, e, helperObject,meta))
-            c.lift(i.point2)
+            i.drawCurve( meta)
+            ref = i.drawPoint2(meta)
+            meta.canvas.bind('<B1-Motion>', lambda e, id=i: movePoint(  id.point2, e, helperObject,meta))
+            meta.canvas.lift(i.point2)
         elif i.point1 == id:
             deltax = e.x - i.x1
             deltay = e.y - i.y1
             i.setPoint1(e.x, e.y)
             if i.anchor1x is not None:
                 i.setAnchor1(i.anchor1x+deltax,i.anchor1y+deltay)
-            i.drawCurve(c,meta)
+            i.drawCurve( meta)
             if ref is not None:
                 i.point1 = ref
             else:
-                i.drawPoint1(c)
-            c.bind('<B1-Motion>', lambda e, id=i: movePoint(c, id.point1, e, helperObject,meta))
-            c.lift(i.point1)
+                i.drawPoint1(meta)
+            meta.canvas.bind('<B1-Motion>', lambda e, id=i: movePoint(  id.point1, e, helperObject,meta))
+            meta.canvas.lift(i.point1)
 
 # unbinds canvas from items when mouse released
-def unbind(c,helperObject,meta):
-    c.unbind('<B1-Motion>')
-    for i in c.find_withtag('anchor'):
-        c.tag_bind(i, '<Button-1>', lambda e, id=i: bindAnchor(c, id, helperObject,meta))
-    for i in c.find_withtag('point'):
-        c.tag_bind(i, '<Button-1>', lambda e, id=i: bindPoint(c, id, helperObject,meta))
+def unbind( helperObject,meta):
+    meta.canvas.unbind('<B1-Motion>')
+    for i in meta.canvas.find_withtag('anchor'):
+        meta.canvas.tag_bind(i, '<Button-1>', lambda e, id=i: bindAnchor(  id, helperObject,meta))
+    for i in meta.canvas.find_withtag('point'):
+        meta.canvas.tag_bind(i, '<Button-1>', lambda e, id=i: bindPoint(  id, helperObject,meta))
 
 # finalizes a curve and starts drawing a new curve
-def restart(c,helperObject,meta):
+def restart( helperObject,meta):
     image = meta.get_image()
     draw = ImageDraw.Draw(image)
     for i in helperObject.curves:
-        print meta.get_width()
-        draw.line(i.locus,fill=meta.get_color(),width=int(meta.get_width()))
-        i.deleteCurve(c)
+        draw.line(i.locus,fill=meta.get_color(),width=meta.get_width())
+        i.deleteCurve(meta.canvas)
     meta.draw(image)
-    c.delete(helperObject.curves[0].point1)
+    meta.canvas.delete(helperObject.curves[0].point1)
     helperObject.curves = []
     helperObject.x_point = None
     helperObject.x_anchor = None
@@ -400,24 +397,16 @@ def restart(c,helperObject,meta):
     helperObject.state = 0
     helperObject.curves = []
     helperObject.object = None
-    c.bind('<Button-1>', lambda e: masterClick(e.x, e.y, helperObject, c,meta))
-    c.bind('<B1-Motion>', lambda e: masterPressedMotion(e.x, e.y, helperObject, c,meta))
-    c.bind('<ButtonRelease-1>', lambda e: masterRelease(e.x, e.y, helperObject, c,meta))
-    c.bind('<Motion>', lambda e: masterMotion(e.x, e.y, helperObject, c,meta))
+    meta.canvas.bind('<Button-1>', lambda e: masterClick(e.x, e.y, helperObject, meta))
+    meta.canvas.bind('<B1-Motion>', lambda e: masterPressedMotion(e.x, e.y, helperObject, meta))
+    meta.canvas.bind('<ButtonRelease-1>', lambda e: masterRelease(e.x, e.y, helperObject, meta))
+    meta.canvas.bind('<Motion>', lambda e: masterMotion(e.x, e.y, helperObject, meta))
 
 # activates curve drawing
-def activate(c,meta):
+def activate(meta):
     helperObject = HelperObject()
-    c.bind('<Button-1>', lambda e: masterClick(e.x, e.y, helperObject, c, meta))
-    c.bind('<B1-Motion>', lambda e: masterPressedMotion(e.x, e.y, helperObject, c,meta))
-    c.bind('<ButtonRelease-1>', lambda e: masterRelease(e.x, e.y, helperObject, c,meta))
-    c.bind('<Motion>',lambda e:masterMotion(e.x,e.y,helperObject,c,meta))
+    meta.canvas.bind('<Button-1>', lambda e: masterClick(e.x, e.y, helperObject, meta))
+    meta.canvas.bind('<B1-Motion>', lambda e: masterPressedMotion(e.x, e.y, helperObject, meta))
+    meta.canvas.bind('<ButtonRelease-1>', lambda e: masterRelease(e.x, e.y, helperObject, meta))
+    meta.canvas.bind('<Motion>',lambda e:masterMotion(e.x,e.y,helperObject,meta))
     return helperObject
-
-'''
-wnd = Tk()
-c = Canvas(wnd,bg='white',width=400,height=400)
-c.pack()
-meta = DrawMeta.MetaResources(400,400,c)
-activate(c,meta)
-wnd.mainloop()'''
