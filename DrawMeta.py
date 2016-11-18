@@ -16,7 +16,7 @@ from PIL import Image, ImageTk
 
 class MetaResources:
     def __init__(self, size_x, size_y,c,im=None):
-        self.image = Image.new('RGB', (size_x, size_y), color='#ffffff')
+        self.image = Image.new('RGBA', (size_x, size_y), color='#ffffff00')
         if im is not None:
             pic = Image.open(im)
             self.image.paste(pic,box=(0,0))
@@ -39,7 +39,7 @@ class MetaResources:
         self.color = col
 
     def set_width(self, w):
-        self.width = w
+        self.width = int(w)
 
     def draw(self, im):
         self.undoStack.append(self.image)

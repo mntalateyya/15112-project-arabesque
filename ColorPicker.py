@@ -29,14 +29,18 @@ class ColorPicker:
         self.redLabels = [0]*17
         self.greenLabels = [0] * 17
         self.blueLabels = [0] * 17
+
+        self.canvas.create_text(20,145,text='R')
         for i in range(17):
             color = '#'+hex(i*16 if i<16 else 255)[2:].rjust(2,'0')+hex(self.green)[2:].rjust(2,'0')+hex(self.blue)[2:].rjust(2,'0')
             self.redLabels[i] = self.canvas.create_rectangle(i*15+40,140,i*15+52,152,outline='#00a2e8',fill=color)
             self.canvas.tag_bind(self.redLabels[i],'<Button-1>',lambda e, i=i: self.changeColor((i*16 if i<16 else 255,self.green,self.blue)))
+        self.canvas.create_text(20, 185, text='G')
         for i in range(17):
             color = '#'+hex(self.red)[2:].rjust(2,'0')+hex(i*16 if i<16 else 255)[2:].rjust(2,'0')+hex(self.blue)[2:].rjust(2,'0')
             self.greenLabels[i] = self.canvas.create_rectangle(i * 15 + 40, 180, i * 15 + 52, 192, outline='#00a2e8',fill=color)
             self.canvas.tag_bind(self.greenLabels[i],'<Button-1>',lambda e, i=i: self.changeColor((self.red,i*16 if i<16 else 255,self.blue)))
+        self.canvas.create_text(20, 225, text='B')
         for i in range(17):
             color = '#'+hex(self.red)[2:].rjust(2,'0')+hex(self.green)[2:].rjust(2,'0')+hex(i*16 if i<16 else 255)[2:].rjust(2,'0')
             self.blueLabels[i] = self.canvas.create_rectangle(i*15+40,220,i*15+52,232,outline='#00a2e8',fill = color)
