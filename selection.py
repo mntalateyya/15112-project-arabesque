@@ -30,38 +30,40 @@ class helperObject:
         c.delete(self.square)
         c.delete(self.image_label)
 
-def masterClick(c, e,helper):
+def masterClick(meta, e,helper):
     if helper.state==1 and not(helper.x1<e.x<helper.x2 and helper.y1<e.y<helper.y2):
-        finalize()
-        c.delete(helper.square)
+        meta.canvas.delete(helper.square)
         helper.state = 0
     if helper.state == 0:
         helper.x1,helper.y1 = e.x,e.y
-        print 'x1,y1:', helper.x1, helper.y1
     elif helper.state == 1:
         helper.mousex = e.x
         helper.mousey = e.y
+        new_im = meta.get_image()
+        new_im.paste('#ffffff00', (helper.x1, helper.y1, helper.x2, helper.y2))
+        meta.draw(new_im)
         helper.state = 2
-        print 'e.x,e.y: ', e.x, e.y, '  =  '
 
-def masterPressedMotion(c,e,helper):
+def masterPressedMotion(meta,e,helper):
     if helper.state == 0:
         helper.x2,helper.y2 = e.x,e.y
-        c.delete(helper.square)
-        helper.square = c.create_rectangle(helper.x1,helper.y1,helper.x2,helper.y2)
+        meta.canvas.delete(helper.square)
+        helper.square = meta.canvas.create_rectangle(helper.x1,helper.y1,helper.x2,helper.y2)
     if helper.state ==2:
-        c.delete(helper.image_label)
-        c.delete(helper.square)
+        meta.canvas.delete(helper.image_label)
+        meta.canvas.delete(helper.square)
         deltax = e.x-helper.mousex
         deltay = e.y-helper.mousey
         helper.TkImage = ImageTk.PhotoImage(image=helper.image)
-        helper.image_label = c.create_image(helper.x1+deltax,helper.y1+deltay, image=helper.TkImage, anchor=NW)
-        helper.square = c.create_rectangle(helper.x1+deltax,helper.y1+deltay,helper.x2+deltax,helper.y2+deltay)
+        helper.image_label = meta.canvas.create_image(helper.x1+deltax,helper.y1+deltay, image=helper.TkImage, anchor=NW)
+        helper.square = meta.canvas.create_rectangle(helper.x1+deltax,helper.y1+deltay,helper.x2+deltax,helper.y2+deltay)
 
-def masterRelease(e,helper,meta):
-    if helper.state == 0:
+def masterRelease(meta, e,helper):
+
+    if helper.state == 0  and e.x!=helper.x1 and e.y!=helper.y1:
         helper.image = meta.get_image().crop((helper.x1,helper.y1,helper.x2,helper.y2))
         helper.state=1
+
     if helper.state ==2:
         deltax = e.x - helper.mousex
         deltay = e.y - helper.mousey
@@ -69,33 +71,44 @@ def masterRelease(e,helper,meta):
         helper.x2 += deltax
         helper.y1 += deltay
         helper.y2 += deltay
+        finalize(meta, helper)
         helper.state = 1
 
 def cut(helper,meta):
     if helper.state ==1:
-        print 'coords',helper.x1, helper.y1, helper.x2, helper.y2
         to_paste = Image.new('RGB', (abs(helper.x2 - helper.x1), abs(helper.y2 - helper.y1)), '#ffffff')
         new_im = meta.get_image()
         new_im.paste(to_paste,(helper.x1, helper.y1, helper.x2, helper.y2))
-        print 'topaste', to_paste,'== new im',new_im
         meta.draw(new_im)
 
 def copy(helper,meta):
-    helper.image = meta.get_image().crop((helper.x1,helper.y1,helper.x2,helper.y2))
+    if helper.state ==1:
+        pass
 
 def paste(helper,meta):
     pass
 
-def finalize():
-    pass
+def finalize(meta,helper):
+    if helper.x1>helper.x2:
+        helper.x1,helper.x2 = helper.x2,helper.x1
+    if helper.y1>helper.y2:
+        helper.y1,helper.y2 = helper.y2, helper.y1
+    # paste image into meta image
+    image = meta.get_image()
+    print image
+    image.paste(helper.image, (helper.x1, helper.y1, helper.x2, helper.y2),helper.image)
+    meta.draw(image)
+    # clear canvas items
+    helper.clear(meta.canvas)
+    helper.state = 0
 
-def activate(c,meta):
+def activate(meta):
     helper = helperObject()
-    c.focus_set()
-    c.bind('<Button-1>',lambda e: masterClick(c,e,helper))
-    c.bind('<B1-Motion>',lambda e: masterPressedMotion(c,e,helper))
-    c.bind('<ButtonRelease-1>',lambda e: masterRelease(e,helper,meta))
-    c.bind('x',lambda e: cut(helper,meta))
-    c.bind('c',lambda e: copy(helper,meta))
-    c.bind('v',lambda e: paste(helper,meta))
+    meta.canvas.focus_set()
+    meta.canvas.bind('<Button-1>',lambda e: masterClick(meta,e,helper))
+    meta.canvas.bind('<B1-Motion>',lambda e: masterPressedMotion(meta,e,helper))
+    meta.canvas.bind('<ButtonRelease-1>',lambda e: masterRelease(meta,e,helper))
+    meta.canvas.bind('x',lambda e: cut(helper,meta))
+    meta.canvas.bind('c',lambda e: copy(helper,meta))
+    meta.canvas.bind('v',lambda e: paste(helper,meta))
     return helper
