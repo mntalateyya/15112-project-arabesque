@@ -1,0 +1,12 @@
+rotate(image,n) = {
+    dim = image.y*2
+    output = Image.new(dim,dim)
+    output.paste(image,(dim/2-image.x/2,0),mask)
+    output.paste(image.invertV,(dim/2-image.x/2,dim/2),mask)
+    for block from 0 to (n-2)/2 {
+        for x from 0 to dim {
+            upperlim
+            lowerlim
+                for y from lowerlim to upperlim {
+                    origin = point_at_clockwise(block*360/n)
+                    output = 

@@ -27,6 +27,7 @@ class helperObject:
         self.image_label = 0
 
     def clear(self,c):
+        self.state = 0
         c.delete(self.square)
         c.delete(self.image_label)
 
@@ -61,6 +62,11 @@ def masterPressedMotion(meta,e,helper):
 def masterRelease(meta, e,helper):
 
     if helper.state == 0  and e.x!=helper.x1 and e.y!=helper.y1:
+        if helper.x1 > helper.x2:
+            helper.x1, helper.x2 = helper.x2, helper.x1
+        if helper.y1 > helper.y2:
+            helper.y1, helper.y2 = helper.y2, helper.y1
+
         helper.image = meta.get_image().crop((helper.x1,helper.y1,helper.x2,helper.y2))
         helper.state=1
 
@@ -74,25 +80,14 @@ def masterRelease(meta, e,helper):
         finalize(meta, helper)
         helper.state = 1
 
-def cut(helper,meta):
+def delete(helper,meta):
     if helper.state ==1:
         to_paste = Image.new('RGB', (abs(helper.x2 - helper.x1), abs(helper.y2 - helper.y1)), '#ffffff')
         new_im = meta.get_image()
         new_im.paste(to_paste,(helper.x1, helper.y1, helper.x2, helper.y2))
         meta.draw(new_im)
 
-def copy(helper,meta):
-    if helper.state ==1:
-        pass
-
-def paste(helper,meta):
-    pass
-
 def finalize(meta,helper):
-    if helper.x1>helper.x2:
-        helper.x1,helper.x2 = helper.x2,helper.x1
-    if helper.y1>helper.y2:
-        helper.y1,helper.y2 = helper.y2, helper.y1
     # paste image into meta image
     image = meta.get_image()
     print image
@@ -108,7 +103,6 @@ def activate(meta):
     meta.canvas.bind('<Button-1>',lambda e: masterClick(meta,e,helper))
     meta.canvas.bind('<B1-Motion>',lambda e: masterPressedMotion(meta,e,helper))
     meta.canvas.bind('<ButtonRelease-1>',lambda e: masterRelease(meta,e,helper))
-    meta.canvas.bind('x',lambda e: cut(helper,meta))
-    meta.canvas.bind('c',lambda e: copy(helper,meta))
-    meta.canvas.bind('v',lambda e: paste(helper,meta))
+    meta.canvas.bind('<Delete>',lambda e: delete(helper,meta))
+
     return helper

@@ -40,3 +40,4 @@ def activate(meta):
     meta.canvas.bind('<Button-1>',lambda e: press(e,helper))
     meta.canvas.bind('<B1-Motion>', lambda e: move(e, helper,meta))
     meta.canvas.bind('<ButtonRelease-1>', lambda e: release(helper,meta))
+    return helper
