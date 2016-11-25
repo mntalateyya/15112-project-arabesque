@@ -1,21 +1,27 @@
-#   Eraser module
+#   Layer module
 #   Code designed by: Mohammed Nurul Hoque (andrewID: mnurulho)
 #
 #   15-112: Principles of Programming and Computer Science at Carnegie Mellon University in Qatar
 #   Term Project
 #
-#   File created on: Wednesday 23 of November 2016, 09:03 PM
+#   File created on: Saturday 19 of November 2016, 06:12 PM
 #   Modification History
 #   Start:          End:
+#   19/11/16 18:12  19/11/16 18:23
+#   19/11/16 18:50  19/11/16 20:18
+#   19/11/16 21:35  19/11/16 21:50
+#   20/11/16 17:50  20/11/16 15:25
 #
 
 from Tkinter import *
 from PIL import Image, ImageTk
 import math
 
+# This module packs the data of each layer in the main canvas and shows its representation
+
 class Layer():
     def __init__(self, im, mode, meta):
-        self.image = im
+        self.image = im # original image of layer
         self.mode = mode
         self.meta = meta
         self.x = 0

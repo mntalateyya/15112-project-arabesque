@@ -58,7 +58,8 @@ class Main:
         self.IDs.append(self.metaTools.create_image(60,25,image=photoImages[-1]))
         self.metaTools.create_text(60,50,text='Export',fill='#888888',font=('Arial',8))
         self.metaTools.tag_bind(self.IDs[-1], '<ButtonRelease-1>', lambda e, id = self.IDs[-1]: self.export())
-        self.metaTools.tag_bind(self.IDs[-1], '<Button-1>', lambda e, id = self.IDs[-1]:self.flash(self.metaTools,id,'export'))
+        self.metaTools.tag_bind(self.IDs[-1], '<Button-1>',
+                                lambda e, id = self.IDs[-1]:self.flash(self.metaTools,id,'export'))
 
         self.image = Image.open('Resources/clear.png')
         photoImages.append(ImageTk.PhotoImage(self.image))
@@ -79,7 +80,8 @@ class Main:
         photoImages.append(ImageTk.PhotoImage(self.image))
         self.IDs.append(self.tools.create_image(118, 60, image=photoImages[-1]))
         self.tools.create_text(118, 85, text='Rotate', fill='#888888', font=('Arial', 8))
-        self.tools.tag_bind(self.IDs[-1], '<ButtonRelease-1>', lambda e: ResizeRotate.Rotate(self))
+        self.tools.tag_bind(self.IDs[-1], '<ButtonRelease-1>',
+                            lambda e: ResizeRotate.Rotate(self) if len(self.meta.layers)>0 else 0)
         self.tools.tag_bind(self.IDs[-1], '<Button-1>',
                                 lambda e, id=self.IDs[-1]:self.flash(self.tools, id, 'rotateL'))
 
@@ -87,7 +89,8 @@ class Main:
         photoImages.append(ImageTk.PhotoImage(self.image))
         self.IDs.append(self.tools.create_image(180,60,image=photoImages[-1]))
         self.tools.create_text(180,85,text='Resize',fill='#888888',font=('Arial',8))
-        self.tools.tag_bind(self.IDs[-1], '<ButtonRelease-1>', lambda e: ResizeRotate.Resize(self))
+        self.tools.tag_bind(self.IDs[-1], '<ButtonRelease-1>',
+                            lambda e: ResizeRotate.Resize(self) if len(self.meta.layers)>0 else 0)
         self.tools.tag_bind(self.IDs[-1], '<Button-1>',
                                 lambda e, id=self.IDs[-1]:self.flash(self.tools, id, 'resizeL'))
 
@@ -103,7 +106,8 @@ class Main:
         photoImages.append(ImageTk.PhotoImage(self.image))
         self.IDs.append(self.tools.create_image(118,130,image=photoImages[-1]))
         self.tools.create_text(118,160,text='Add',fill='#888888',font=('Arial',8))
-        self.tools.tag_bind(self.IDs[-1],'<ButtonRelease-1>',lambda e: templates.template(self))###
+        self.tools.tag_bind(self.IDs[-1],'<ButtonRelease-1>',
+                            lambda e:templates.template(self) if len(self.meta.layers)<5 else 0)
         self.tools.tag_bind(self.IDs[-1], '<Button-1>',
                                 lambda e, id=self.IDs[-1]:self.flash(self.tools, id, 'addL'))
 
@@ -129,7 +133,7 @@ class Main:
             self.layers_labels.append(self.meta.layers[i].get_canvas())
             self.meta.layers[i].redraw()
             self.layers_labels[-1].grid(pady=2)
-        image = Image.new('RGBA',(620,620))
+        image = Image.new('RGBA',(620,620),'#ffffff00')
         for i in range(len(self.meta.layers)-1,-1,-1):
             image.paste(self.meta.layers[i].get_im(),
                         (self.meta.layers[i].x, self.meta.layers[i].y),self.meta.layers[i].get_im())
@@ -141,12 +145,15 @@ class Main:
         self.canvas.create_image(0,0,anchor=NW, image=self.IDs[-1])
 
     def import_layer(self):
-        file = tkFileDialog.askopenfilename(title="Import",
-                                     filetypes=(("Image files", "*.jpg;*.jpeg;*.png;*.bmp"), ("all files", "*.*")))
-        if file:
-            image = Image.open(file)
-            image.putalpha(255)
-            self.meta.add_layer(image,'F')
+        if len(self.meta.layers)<5:
+            file = tkFileDialog.askopenfilename(title="Import",
+                                         filetypes=(("Image files", "*.jpg;*.jpeg;*.png;*.bmp"), ("all files", "*.*")))
+            if file:
+                image = Image.open(file)
+                image.putalpha(255)
+                if image.size[0]>620 or image.size[1]>620:
+                    image = image.resize((620,620))
+                self.meta.add_layer(image,'F')
 
     def to_move(self,e):
         if self.meta.layers:
@@ -213,5 +220,8 @@ class Main:
         else:
             self.IDs.append(ImageTk.PhotoImage(Image.open('Resources/' + string + '.png')))
             c.itemconfig(id, image=self.IDs[-1])
+
+def printer(s):
+    print s
 
 application = Main()

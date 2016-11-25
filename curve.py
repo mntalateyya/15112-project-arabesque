@@ -440,6 +440,13 @@ def unbind(helperObject, meta):
         meta.canvas.tag_bind(i, '<Button-1>', lambda e, id=i: bindPoint(id, helperObject, meta))
 
 
+def terminate(helper, meta):
+    if len(helper.curves)>1 and (helper.state ==2 or helper.state==3):
+        helper.curves[-1].deleteCurve(meta.canvas)
+        helper.curves.pop()
+        helper.state = 4
+
+
 # finalizes a curve and starts drawing a new curve
 def restart(helperObject, meta):
     # get canvas image
@@ -482,4 +489,5 @@ def activate(meta):
     meta.canvas.bind('<B1-Motion>', lambda e: masterPressedMotion(e.x, e.y, helperObject, meta))
     meta.canvas.bind('<ButtonRelease-1>', lambda e: masterRelease(e.x, e.y, helperObject, meta))
     meta.canvas.bind('<Motion>', lambda e: masterMotion(e.x, e.y, helperObject, meta))
+    meta.canvas.bind('<space>',lambda e: terminate(helperObject,meta))
     return helperObject

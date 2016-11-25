@@ -8,6 +8,7 @@ class Resize:
         self.parent = parent
 
         self.root = Toplevel()
+        self.root.grab_set()
         self.root.geometry('240x150')
         self.root.title('Resize')
 
@@ -49,6 +50,7 @@ class Rotate:
         self.parent = parent
 
         self.root = Toplevel()
+        self.root.grab_set()
         self.root.geometry('240x100')
         self.root.title('Rotate')
 

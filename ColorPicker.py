@@ -21,6 +21,7 @@ class ColorPicker:
     def __init__(self,master):
         # create window and pack a canvas in its entirety
         self.root = Toplevel()
+        self.root.grab_set()
         self.root.resizable(width=False, height=False)
         self.canvas = Canvas(self.root,bg='white', width=400,height=270)
         self.canvas.pack()

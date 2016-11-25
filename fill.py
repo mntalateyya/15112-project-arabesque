@@ -44,6 +44,8 @@ class helperObject:
 # ===== This algoriths is cited from https://en.wikipedia.org/wiki/Flood_fill =====
 def fill_loop( im, fillColor, origin, w, h, q):
     while q!=[]:  # queue is not empty
+        if len(q)>400000:
+            return
         n = q.pop()  # take out last pixel of queue
         im[n[0],n[1]] = fillColor  # fill pixel with fill color
         # if a neighbour pixel has the target color, add pixel to queue

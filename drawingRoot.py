@@ -45,6 +45,7 @@ class drawer:
         self.MainMeta = meta
         # create window
         self.root = Toplevel(bg='#888888')
+        self.root.grab_set()
         self.root.geometry('720x'+str(y+130)) # window size
         self.root.iconbitmap('Resources/icon.ico') # icon
         self.root.resizable(width=False, height=False) # fix size
@@ -167,8 +168,7 @@ class drawer:
         finish = self.bottom.create_image(670, 23, image=self.labels[-1])
         self.bottom.tag_bind(finish,'<ButtonRelease-1>',lambda e: self.finalize())
 
-        # self.canvas.bind('<Control_L><z>', self.meta.undo)
-        # self.canvas.bind('<Control_L><y>', lambda e: self.meta.redo)
+        self.canvas.focus_set()
 
         self.tools.lower(self.square)
         self.preprocess()
@@ -187,6 +187,7 @@ class drawer:
             self.canvas.unbind('<B1-Motion>')
             self.canvas.unbind('<Motion>')
             self.canvas.unbind('<Delete>')
+            self.canvas.unbind('<space>')
             self.helper.clear(self.canvas)
         self.tools.lower(self.square)
         self.change_focus(id,string) # change active tool reference
