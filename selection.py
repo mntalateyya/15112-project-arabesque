@@ -112,7 +112,7 @@ def masterRelease(meta, e,helper):
 # delete selected area and fill it with transparent white
 def delete(helper,meta):
     if helper.state ==1:
-        to_paste = Image.new('RGBA', (abs(helper.x2 - helper.x1), abs(helper.y2 - helper.y1)), '#ffffff00')
+        to_paste = Image.new('RGB', (abs(helper.x2 - helper.x1), abs(helper.y2 - helper.y1)), '#ffffff00')
         # amend meta with new image
         new_im = meta.get_image()
         new_im.paste(to_paste,(helper.x1, helper.y1, helper.x2, helper.y2))
