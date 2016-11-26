@@ -27,7 +27,6 @@ class HelperObject:
         self.y = None
 
 def move(e,helper,meta):
-    print '$$'
     # movement begin
     if helper.x is None:
         # set position
@@ -45,7 +44,6 @@ def move(e,helper,meta):
 
 # activate tool
 def activate(meta):
-    print 'act'
     # create helper object and bind canvas items to tool's methods
     helper = HelperObject()
     meta.canvas.bind('<B1-Motion>', lambda e: move(e, helper,meta))

@@ -18,7 +18,7 @@ from Tkinter import *
 from PIL import Image, ImageTk
 
 
-# This is a class that manages some meta date for the drawing window
+# This is a class that manages meta date for the drawing window
 class MetaResources:
     def __init__(self, size_x, size_y,parent,c,im=None):
         self.image = Image.new('RGBA', (size_x, size_y), color='#ffffff00') # new image

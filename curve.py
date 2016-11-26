@@ -23,8 +23,9 @@
 #   13/11/16 19:40  13/11/16 20:15
 #   16/11/16 09:45  16/11/16 10:00
 #   22/11/16 21:00  22/11/16 21:50
-''' This module draws bezier curves on a Tkinter canvas. It is activated by calling activate function and deactivated
- calling deactivate function. When active, it binds mouse motion and left mouse button to its functions.'''
+
+# This module draws bezier curves on a Tkinter canvas. It is activated by calling activate function and deactivated
+# calling deactivate function. When active, it binds mouse motion and left mouse button to its functions.
 
 from PIL import ImageDraw
 
@@ -439,7 +440,7 @@ def unbind(helperObject, meta):
     for i in meta.canvas.find_withtag('point'):
         meta.canvas.tag_bind(i, '<Button-1>', lambda e, id=i: bindPoint(id, helperObject, meta))
 
-
+# terminate drawing when spacebar pressed
 def terminate(helper, meta):
     if len(helper.curves)>1 and (helper.state ==2 or helper.state==3):
         helper.curves[-1].deleteCurve(meta.canvas)

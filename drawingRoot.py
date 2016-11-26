@@ -45,12 +45,15 @@ class drawer:
         self.MainMeta = meta
         # create window
         self.root = Toplevel(bg='#888888')
+        self.root.title('Draw')
         self.root.grab_set()
-        self.root.geometry('720x'+str(y+130)) # window size
+        s = '720x'+str(y+130)+'+200+0'
+        self.root.geometry(s) # window size
         self.root.iconbitmap('Resources/icon.ico') # icon
         self.root.resizable(width=False, height=False) # fix size
         self.tools = Canvas(self.root,width=720,height=58,bg='white') # a canvas to draw tools
-        self.canvas = Canvas(self.root,width=x,height=y,bg='white',cursor='crosshair',bd=0) # drawing canvas
+        self.canvas = Canvas(self.root,width=x,height=y,bg='white',cursor='crosshair',
+                             bd=-2,highlightthickness=0) # drawing canvas
         self.tools.grid()
         self.canvas.grid(pady=10)
         self.bottom = Canvas(self.root,width=720,height=50,bg='#f0f0f0')

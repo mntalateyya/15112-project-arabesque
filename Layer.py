@@ -11,7 +11,7 @@
 #   19/11/16 18:50  19/11/16 20:18
 #   19/11/16 21:35  19/11/16 21:50
 #   20/11/16 17:50  20/11/16 15:25
-#
+#   26/11/16 11:35  26/11/16 11:43
 
 from Tkinter import *
 from PIL import Image, ImageTk
@@ -21,76 +21,89 @@ import math
 
 class Layer():
     def __init__(self, im, mode, meta):
-        self.image = im # original image of layer
+        self.image = im  # original image of layer
         self.mode = mode
         self.meta = meta
         self.x = 0
         self.y = 0
         self.widthO,self.heightO = im.size
-        self.repr = process(self.image,self.mode)
+        self.repr = process(self.image,self.mode)  # image to represent layer on canvas
         self.widthR, self.heightR = self.repr.size
         self.photos = []
         self.canvas = Canvas(meta.parent.frame2,width=235, height = 60, bg='white')
         self.init_canvas()
 
+    # getters
     def get_im(self):
         return self.repr
 
     def get_canvas(self):
         return self.canvas
 
+    # set image of layer
     def set_im(self,im):
         self.repr = im
 
+    # create the layer label (a canvas)
     def init_canvas(self):
         self.canvas.config(highlightbackground='#00a2e8')
 
+        # create a thumbnail of the layer's image
+        # ewsize
         if self.widthR>self.heightR*1.5:
             ratio = 75.0/self.widthR
         else:
             ratio = 50.0/self.heightR
         self.photos.append(ImageTk.PhotoImage(self.repr.resize((
             int(self.widthR * ratio)-2, int(self.heightR * ratio)-2),Image.ANTIALIAS)))
+        # draw
         self.thumbnail = self.canvas.create_image(47,32,image = self.photos[-1])
         self.canvas.create_rectangle(10, 7, 85, 57, outline='gray')
 
+        # tools' icons
+        # move up
         self.photos.append(ImageTk.PhotoImage(Image.open('Resources/up.png')))
         self.up = self.canvas.create_image(100,30,image=self.photos[-1])
         self.canvas.tag_bind(self.up,'<ButtonRelease-1>',lambda e: self.move(1))
-
+        # move down
         self.photos.append(ImageTk.PhotoImage(Image.open('Resources/down.png')))
         self.down = self.canvas.create_image(125, 30, image=self.photos[-1])
         self.canvas.tag_bind(self.down, '<ButtonRelease-1>', lambda e: self.move(0))
-
+        # merge with below
         self.photos.append(ImageTk.PhotoImage(Image.open('Resources/mergeL.png')))
         self.mergeL = self.canvas.create_image(150, 30, image=self.photos[-1])
         self.canvas.tag_bind(self.mergeL, '<ButtonRelease-1>', lambda e: self.merge())
-
+        # duplicate
         self.photos.append(ImageTk.PhotoImage(Image.open('Resources/duplicate.png')))
         self.duplicate = self.canvas.create_image(175, 30, image=self.photos[-1])
-        self.canvas.tag_bind(self.duplicate,'<ButtonRelease-1>',lambda e: self.meta.add_layer(self.image.copy(),self.mode))
-
+        self.canvas.tag_bind(self.duplicate,'<ButtonRelease-1>',
+                             lambda e: self.meta.add_layer(self.image.copy(),self.mode))
+        # delete
         self.photos.append(ImageTk.PhotoImage(Image.open('Resources/delete.png')))
         self.delete = self.canvas.create_image(200, 30, image=self.photos[-1])
         self.canvas.tag_bind(self.delete, '<ButtonRelease-1>', lambda e: self.meta.remove_layer(self))
-
+        # bind clicking on layer's label to changing focus to the layer
         self.canvas.bind('<Button-1>', lambda e: self.meta.change_focus(self))
 
+    # call the functions in parent window to execute the command
     def move(self,i):
         self.meta.move_layer(self,i)
 
     def merge(self):
         self.meta.merge_layers(self)
 
+    # redraw label canvas
     def redraw(self):
-        self.canvas.delete('all')
-        self.init_canvas()
+        self.canvas.delete('all') # delete all items
+        self.init_canvas()  # redraw
 
+    # configure as first layer in stack (disable move up)
     def config_first(self):
         self.canvas.tag_unbind(self.up,'<ButtonRelease-1>')
         self.photos.append(ImageTk.PhotoImage(Image.open('Resources/up_.png')))
         self.canvas.itemconfig(self.up,image=self.photos[-1])
 
+    # configure as first layer in stack (disable move down and merge with below)
     def config_last(self):
         self.canvas.tag_unbind(self.down, '<ButtonRelease-1>')
         self.photos.append(ImageTk.PhotoImage(Image.open('Resources/down_.png')))

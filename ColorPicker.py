@@ -49,7 +49,8 @@ class ColorPicker:
         i = 0
         for y in [0,1,2,3]:
             for x in range(16):
-                color = '#'+hex(colors[i][0])[2:].rjust(2,'0')+hex(colors[i][1])[2:].rjust(2,'0')+hex(colors[i][2])[2:].rjust(2,'0')
+                color = '#'+hex(colors[i][0])[2:].rjust(2,'0')+hex(colors[i][1])[2:].rjust(2,'0')+\
+                        hex(colors[i][2])[2:].rjust(2,'0')
                 box = self.canvas.create_rectangle(x*25+5,y*25+2,x*25+25,y*25+22,fill=color,outline='#00a2e8')
                 self.canvas.tag_bind(box,'<Button-1>',lambda e,i=i: self.changeColor(colors[i]))
                 i+=1
@@ -60,19 +61,26 @@ class ColorPicker:
         self.blueLabels = [0] * 17
         self.canvas.create_text(20,145,text='R')
         for i in range(17):  # Red shades
-            color = '#'+hex(i*16 if i<16 else 255)[2:].rjust(2,'0')+hex(self.green)[2:].rjust(2,'0')+hex(self.blue)[2:].rjust(2,'0')
+            color = '#'+hex(i*16 if i<16 else 255)[2:].rjust(2,'0')+hex(self.green)[2:].rjust(2,'0')+\
+                    hex(self.blue)[2:].rjust(2,'0')
             self.redLabels[i] = self.canvas.create_rectangle(i*15+40,140,i*15+52,152,outline='#00a2e8',fill=color)
-            self.canvas.tag_bind(self.redLabels[i],'<Button-1>',lambda e, i=i: self.changeColor((i*16 if i<16 else 255,self.green,self.blue)))
+            self.canvas.tag_bind(self.redLabels[i],'<Button-1>'
+                                 ,lambda e, i=i: self.changeColor((i*16 if i<16 else 255,self.green,self.blue)))
         self.canvas.create_text(20, 185, text='G')
         for i in range(17):  # Green shades
-            color = '#'+hex(self.red)[2:].rjust(2,'0')+hex(i*16 if i<16 else 255)[2:].rjust(2,'0')+hex(self.blue)[2:].rjust(2,'0')
-            self.greenLabels[i] = self.canvas.create_rectangle(i * 15 + 40, 180, i * 15 + 52, 192, outline='#00a2e8',fill=color)
-            self.canvas.tag_bind(self.greenLabels[i],'<Button-1>',lambda e, i=i: self.changeColor((self.red,i*16 if i<16 else 255,self.blue)))
+            color = '#'+hex(self.red)[2:].rjust(2,'0')+hex(i*16 if i<16 else 255)[2:].rjust(2,'0')+\
+                    hex(self.blue)[2:].rjust(2,'0')
+            self.greenLabels[i] = self.canvas.create_rectangle(i * 15 + 40, 180, i * 15 + 52, 192,
+                                                               outline='#00a2e8',fill=color)
+            self.canvas.tag_bind(self.greenLabels[i],'<Button-1>',
+                                 lambda e, i=i: self.changeColor((self.red,i*16 if i<16 else 255,self.blue)))
         self.canvas.create_text(20, 225, text='B')
         for i in range(17):  # Blue shades
-            color = '#'+hex(self.red)[2:].rjust(2,'0')+hex(self.green)[2:].rjust(2,'0')+hex(i*16 if i<16 else 255)[2:].rjust(2,'0')
+            color = '#'+hex(self.red)[2:].rjust(2,'0')+hex(self.green)[2:].rjust(2,'0')+\
+                    hex(i*16 if i<16 else 255)[2:].rjust(2,'0')
             self.blueLabels[i] = self.canvas.create_rectangle(i*15+40,220,i*15+52,232,outline='#00a2e8',fill = color)
-            self.canvas.tag_bind(self.blueLabels[i],'<Button-1>',lambda e, i=i: self.changeColor((self.red,self.green,i*16 if i<16 else 255)))
+            self.canvas.tag_bind(self.blueLabels[i],'<Button-1>',
+                                 lambda e, i=i: self.changeColor((self.red,self.green,i*16 if i<16 else 255)))
 
     # change selection to given color tuple
     def changeColor(self,color):
@@ -84,13 +92,16 @@ class ColorPicker:
 
         # redraw RGB shades to match the currently selected color
         for i in range(17):  # red shades
-            color = '#'+hex(i*16 if i<16 else 255)[2:].rjust(2,'0')+hex(self.green)[2:].rjust(2,'0')+hex(self.blue)[2:].rjust(2,'0')
+            color = '#'+hex(i*16 if i<16 else 255)[2:].rjust(2,'0')+hex(self.green)[2:].rjust(2,'0')+\
+                    hex(self.blue)[2:].rjust(2,'0')
             self.canvas.itemconfig(self.redLabels[i],fill=color)
         for i in range(17):  # green shades
-            color = '#'+hex(self.red)[2:].rjust(2,'0')+hex(i*16 if i<16 else 255)[2:].rjust(2,'0')+hex(self.blue)[2:].rjust(2,'0')
+            color = '#'+hex(self.red)[2:].rjust(2,'0')+hex(i*16 if i<16 else 255)[2:].rjust(2,'0')+\
+                    hex(self.blue)[2:].rjust(2,'0')
             self.canvas.itemconfig(self.greenLabels[i], fill=color)
         for i in range(17):  # blue shades
-            color = '#'+hex(self.red)[2:].rjust(2,'0')+hex(self.green)[2:].rjust(2,'0')+hex(i*16 if i<16 else 255)[2:].rjust(2,'0')
+            color = '#'+hex(self.red)[2:].rjust(2,'0')+hex(self.green)[2:].rjust(2,'0')+\
+                    hex(i*16 if i<16 else 255)[2:].rjust(2,'0')
             self.canvas.itemconfig(self.blueLabels[i], fill=color)
         self.canvas.itemconfig(self.colorBox,fill = self.color) # change color of selected color box
 

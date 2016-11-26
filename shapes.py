@@ -40,9 +40,11 @@ def move(helper, meta,e):
 
     # choose rectangle or oval (oval=0, rectangle = 1)
     if helper.shape:
-        helper.draw = meta.canvas.create_oval(helper.x1,helper.y1,helper.x2,helper.y2,outline=meta.get_color(),width=meta.get_width())
+        helper.draw = meta.canvas.create_oval(helper.x1,helper.y1,helper.x2,helper.y2,
+                                              outline=meta.get_color(),width=meta.get_width())
     else:
-        helper.draw = meta.canvas.create_rectangle(helper.x1,helper.y1,helper.x2,helper.y2,outline=meta.get_color(),width=meta.get_width())
+        helper.draw = meta.canvas.create_rectangle(helper.x1,helper.y1,helper.x2,helper.y2,
+                                                   outline=meta.get_color(),width=meta.get_width())
 
 # when mouse released, shape drawn to canvas image
 def release(helper, meta):
@@ -53,12 +55,15 @@ def release(helper, meta):
 
         image = meta.get_image()  # get canvas image
         Draw = ImageDraw.Draw(image)
+        w = meta.get_width()
         if helper.shape:
-            for i in range(meta.get_width()):
-                Draw.ellipse((helper.x1+i,helper.y1+i,helper.x2-i,helper.y2-i),outline=meta.get_color())
+            for i in range(w):
+                Draw.ellipse((helper.x1+i-w/2,helper.y1+i-w/2,helper.x2-i+w/2,helper.y2-i+w/2),
+                             outline=meta.get_color())
         else:
-            for i in range(meta.get_width()):
-                Draw.rectangle((helper.x1+i,helper.y1+i,helper.x2-i,helper.y2-i),outline=meta.get_color())
+            for i in range(w):
+                Draw.rectangle((helper.x1+i-w/2,helper.y1+i-w/2,helper.x2-i+w/2,helper.y2-i+w/2),
+                               outline=meta.get_color())
         meta.draw(image)  # push image to canvas
         helper.clear(meta.canvas) # clear the canvas drawing
 
